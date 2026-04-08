@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68.0", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "beskar-theme"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "PySide6>=6.7",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
