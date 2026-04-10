@@ -61,6 +61,14 @@ def safe_filename_unique(name: str, directory: Path, name_key: str | None = None
         target = directory / f"{candidate}{extension}"
         if not target.exists():
             return candidate
+        # If the file is a symlink escaping the directory, skip it — don't
+        # reuse the slug or overwrite through the symlink.
+        try:
+            contained_path(target, directory)
+        except ValueError:
+            candidate = f"{base}-{counter}"
+            counter += 1
+            continue
         try:
             with open(target, "rb") as f:
                 data = tomllib.load(f)
@@ -74,7 +82,8 @@ def safe_filename_unique(name: str, directory: Path, name_key: str | None = None
             if isinstance(existing_name, str) and existing_name.strip() == name.strip():
                 return candidate  # same display name — overwrite is intentional
         except Exception:
-            return candidate  # can't read it, just use this slot
+            # Can't read it — don't overwrite, skip to next candidate
+            pass
         candidate = f"{base}-{counter}"
         counter += 1
 
