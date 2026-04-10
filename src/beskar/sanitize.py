@@ -8,6 +8,9 @@ from pathlib import Path
 _UNSAFE_CHARS = re.compile(r"[^a-z0-9_-]+")
 # Collapse repeated hyphens
 _MULTI_HYPHEN = re.compile(r"-{2,}")
+# Shell metacharacters and control chars — anything that could mean
+# something special to a shell, IPC command, or config parser
+_SHELL_META = re.compile(r"[;|&`$\\\"'<>(){}\[\]!#~\x00-\x1f\x7f]")
 
 MAX_FILENAME_LEN = 80
 
@@ -29,6 +32,17 @@ def safe_filename(name: str) -> str:
     if not slug:
         slug = uuid.uuid4().hex
     return slug
+
+
+def clean_display_name(name: str) -> tuple[str, bool]:
+    """Silently strip shell metacharacters and control chars from a display name.
+
+    Returns (cleaned_string, was_naughty) where was_naughty is True if
+    anything was stripped.
+    """
+    cleaned = _SHELL_META.sub("", name)
+    cleaned = " ".join(cleaned.split())  # collapse whitespace runs
+    return cleaned, cleaned != name
 
 
 def contained_path(path: Path, root: Path) -> Path:
