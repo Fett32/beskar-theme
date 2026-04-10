@@ -34,6 +34,51 @@ def safe_filename(name: str) -> str:
     return slug
 
 
+def safe_filename_unique(name: str, directory: Path, name_key: str | None = None,
+                         extension: str = ".toml") -> str:
+    """Like safe_filename(), but appends -2, -3, ... if the slug already exists
+    with a different display name.
+
+    Args:
+        name: User-visible display name.
+        directory: Where files are stored.
+        name_key: TOML key that holds the display name inside the file.
+            If None, collision check is skipped (behaves like safe_filename).
+        extension: File extension including the dot.
+
+    Returns:
+        A slug guaranteed not to collide with a different display name.
+    """
+    import tomllib
+
+    base = safe_filename(name)
+    if name_key is None:
+        return base
+
+    candidate = base
+    counter = 2
+    while True:
+        target = directory / f"{candidate}{extension}"
+        if not target.exists():
+            return candidate
+        try:
+            with open(target, "rb") as f:
+                data = tomllib.load(f)
+            # Support dotted keys like "layout.name"
+            existing_name = data
+            for part in name_key.split("."):
+                existing_name = existing_name.get(part, "")
+                if not isinstance(existing_name, dict) and part != name_key.split(".")[-1]:
+                    existing_name = ""
+                    break
+            if isinstance(existing_name, str) and existing_name.strip() == name.strip():
+                return candidate  # same display name — overwrite is intentional
+        except Exception:
+            return candidate  # can't read it, just use this slot
+        candidate = f"{base}-{counter}"
+        counter += 1
+
+
 def clean_display_name(name: str) -> tuple[str, bool]:
     """Silently strip shell metacharacters and control chars from a display name.
 
