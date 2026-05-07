@@ -4,41 +4,12 @@ import tomllib
 from pathlib import Path
 from PySide6.QtGui import QColor
 
+from beskar.tokens import key_map
+
 _THEME_FILE = Path.home() / ".config" / "beskar" / "theme.toml"
 
-# Maps theme.toml keys to beskar.colors attribute names
-_KEY_MAP = {
-    "surfaces": {
-        "base": "SURFACE_BASE",
-        "raised": "SURFACE_RAISED",
-        "overlay": "SURFACE_OVERLAY",
-        "input": "SURFACE_INPUT",
-        "alt": "SURFACE_ALT",
-    },
-    "borders": {
-        "default": "BORDER",
-        "hover": "BORDER_HOVER",
-    },
-    "text": {
-        "primary": "TEXT",
-        "bright": "TEXT_BRIGHT",
-        "slot": "TEXT_SLOT",
-        "label": "TEXT_LABEL",
-        "dim": "TEXT_DIM",
-    },
-    "accents": {
-        "yellow": "ACCENT_YELLOW",
-        "blue": "ACCENT_BLUE",
-        "link": "ACCENT_LINK",
-    },
-    "semantic": {
-        "highlight": "HIGHLIGHT",
-        "selection_green": "SELECTION_GREEN",
-        "terminal_green": "TERMINAL_GREEN",
-        "button": "BUTTON",
-        "button_text": "BUTTON_TEXT",
-    },
-}
+# Derived from the canonical token registry.
+_KEY_MAP = key_map()
 
 
 def load_overrides() -> dict[str, QColor]:

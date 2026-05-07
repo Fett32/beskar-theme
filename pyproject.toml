@@ -10,5 +10,11 @@ dependencies = [
     "PySide6>=6.7",
 ]
 
+[project.optional-dependencies]
+export = ["tomli-w"]
+
+[project.scripts]
+beskar-export = "beskar.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
